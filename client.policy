@@ -1,3 +1,3 @@
-grant codeBase "file:/Users/kfischer/Projects/CS262/" {
+grant codeBase "file:/C:/Users/aakab_000/IdeaProjects/CS262Project/" {
     permission java.security.AllPermission;
 };
