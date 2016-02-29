@@ -1,8 +1,6 @@
-compute/%.class: compute/%.java
+%.class: %.java
 	javac $^
-%/%.class: %/%.java
-	javac -cp compute.jar $^
-compute.jar: compute/Compute.class compute/Task.class
-	jar cvf compute.jar $^
-run-server: engine/ComputeEngine.java
-	java -cp .:$(pwd)/compute.jar -Djava.rmi.server.codebase=file:$(pwd)/compute.jar -Djava.rmi.server.hostname=localhost -Djava.security.policy=server.policy engine.ComputeEngine
+chatclient/Client.class: chatclient/Client.java chatserver/ChatServer.class chatserver/Server.class
+	javac chatclient/Client.java
+run-server: chatclient/Client.class chatclient/ClientCallback.class chatserver/ChatServer.class chatserver/Server.class
+	java -cp . -Djava.rmi.server.hostname=localhost -Djava.security.policy=keno.policy chatserver.Server

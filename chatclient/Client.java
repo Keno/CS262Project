@@ -5,6 +5,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
+import java.util.List;
 
 import chatserver.ChatServer;
 
@@ -16,6 +17,18 @@ public class Client implements ClientCallback{
     private String name;
     private ChatServer server;
     private ClientCallback myStub;
+
+    static private void PrintlnResponse(String output) {
+        System.out.print((char)27 + "[1m" + (char)27 + "[34m");
+        System.out.println(output);
+        System.out.print((char)27 + "[0m");
+    }
+
+    static private void PrintlnError(String output) {
+        System.out.print((char)27 + "[1m" + (char)27 + "[31m");
+        System.out.println(output);
+        System.out.print((char)27 + "[0m");
+    }
 
     public void login(String fromHost, String accountName){
         try {
@@ -33,7 +46,8 @@ public class Client implements ClientCallback{
         }
         catch (RemoteException e) {
             System.out.println("Failed");
-            e.printStackTrace(System.out);        }
+            e.printStackTrace(System.out);
+        }
     }
 
     public void logout(){
@@ -45,14 +59,79 @@ public class Client implements ClientCallback{
         }
     }
 
-    public int addAccount(String accountName){
+    public void addAccount(String accountName){
         try {
-            return server.addAccount(accountName);
+            server.addAccount(accountName);
         }
         catch (RemoteException e){
-            System.out.println("Can't connect to server");
+            if (e.getCause() instanceof Error) {
+                PrintlnError(e.getCause().getMessage());
+            } else {
+                System.out.println("Can't connect to server");
+                e.printStackTrace(System.out);
+            }
+        }
+    }
+
+    public void addGroup(String accountName){
+        try {
+            server.addGroup(accountName);
+        }
+        catch (RemoteException e){
+            if (e.getCause() instanceof Error) {
+                PrintlnError(e.getCause().getMessage());
+            } else {
+                System.out.println("Can't connect to server");
+                e.printStackTrace(System.out);
+            }
+        }
+    }
+
+    public void addGroupMember(String groupName, String username){
+        try {
+            server.addGroupMember(groupName, username);
+        }
+        catch (RemoteException e){
+            if (e.getCause() instanceof Error) {
+                PrintlnError(e.getCause().getMessage());
+            } else {
+                System.out.println("Can't connect to server");
+                e.printStackTrace(System.out);
+            }
+        }
+    }
+
+    public void listAccounts(String query) {
+        List<String> accounts;
+        try {
+            accounts = server.listAccounts(query);
+        } catch (RemoteException e) {
+            System.out.println("Failed to retrieve account list");
             e.printStackTrace(System.out);
-            return 1;
+            return;
+        }
+        if (accounts.isEmpty()) {
+            PrintlnError("No accounts found.");
+        }
+        for (String account : accounts) {
+            PrintlnResponse(account);
+        }
+    }
+
+    public void listGroups(String query) {
+        List<String> accounts;
+        try {
+            accounts = server.listGroups(query);
+        } catch (RemoteException e) {
+            System.out.println("Failed to retrieve account list");
+            e.printStackTrace(System.out);
+            return;
+        }
+        if (accounts.isEmpty()) {
+            PrintlnError("No accounts found.");
+        }
+        for (String account : accounts) {
+            PrintlnResponse(account);
         }
     }
 
@@ -99,6 +178,10 @@ public class Client implements ClientCallback{
 
     public static void main(String [] args)
     {
+        if (args.length == 0) {
+            System.out.println("Please provide the Server hostname as the first argument");
+            return;
+        }
         System.out.println("Please log in. Enter an existing or new username");
         String input = System.console().readLine();
         Client a = new Client();
@@ -108,6 +191,28 @@ public class Client implements ClientCallback{
             String[] command = System.console().readLine().split(" ", 3);
             if(command[0].equals("AddAccount")){
                 a.addAccount(command[1]);
+            }
+            else if(command[0].equals("ListAccounts"))
+            {
+                a.listAccounts(command.length > 1 ? command[1] : "");
+            }
+            else if(command[0].equals("ListGroups"))
+            {
+                a.listGroups(command.length > 1 ? command[1] : "");
+            }
+            else if(command[0].equals("AddGroup"))
+            {
+                if (command.length != 2)
+                    PrintlnError("Syntax: AddGroup name");
+                else
+                    a.addGroup(command[1]);
+            }
+            else if(command[0].equals("AddGroupMember"))
+            {
+                if (command.length != 3)
+                    PrintlnError("Syntax: AddGroupMember name user");
+                else
+                    a.addGroupMember(command[1],command[2]);
             }
             else if(command[0].equals("Send")){
                 a.sendMessage(command[1], command[2]);

@@ -20,13 +20,15 @@ public interface ChatServer extends Remote{
 
     //void logout(Client client) throws RemoteException;
 
-    int addAccount(String accountName) throws RemoteException;
+    void addAccount(String accountName) throws RemoteException;
 
-    /*List<String> listAccounts(String searchTerm) throws RemoteException;
+    List<String> listAccounts(String query) throws RemoteException;
 
-    int addGroup(String groupName, Set<String> groupMembers) throws RemoteException;
+    void addGroup(String groupName) throws RemoteException;
 
-    List<String> listGroups(String searchTerm) throws RemoteException;*/
+    void addGroupMember(String groupName, String accountName) throws RemoteException;
+
+    List<String> listGroups(String searchTerm) throws RemoteException;
 
     void sendMessage(String accountName, String message) throws RemoteException;
 
