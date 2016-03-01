@@ -10,7 +10,7 @@ import java.util.List;
 import chatserver.ChatServer;
 
 /**
- * Created by Aaron on 2/27/2016.
+ * CS262 assignment 1
  */
 public class Client implements ClientCallback{
 
@@ -30,6 +30,12 @@ public class Client implements ClientCallback{
         System.out.print((char)27 + "[0m");
     }
 
+    /**
+     * Logs accountName into server, creating account accountName if it does not already exist
+     * @param fromHost: Hostname of registry host to connect to
+     * @param accountName: Name of account to login to
+     * @Poststate: Server creates account accountName if it does not already exist
+     */
     public void login(String fromHost, String accountName){
         try {
             server = getServer(fromHost);
@@ -41,73 +47,94 @@ public class Client implements ClientCallback{
                 name = accountName;
             }
             else {
-                System.out.println("Can't find server");
+                System.out.println("Server not found. Check your network connection and that you have specified the correct server ip address.");
+                System.exit(0);
             }
         }
         catch (RemoteException e) {
-            System.out.println("Failed");
-            e.printStackTrace(System.out);
+            System.out.println("Unable to complete request due to communication failure. Check your network connection and the server.");
+            System.exit(0);
         }
     }
 
+    /**
+     * Logs account corresponding to Client object out of server
+     */
     public void logout(){
         try {
             server.logout(name);
         }
         catch(RemoteException e){
-            e.printStackTrace(System.out);
+            System.out.println("Unable to communicate with server. Check your network connection and the server. You have not been logged out.");
         }
     }
 
+    /**
+     * Adds accountName as an account on the server
+     * @param accountName: account to add to the server
+     */
     public void addAccount(String accountName){
         try {
             server.addAccount(accountName);
+            System.out.println("Account added");
         }
         catch (RemoteException e){
             if (e.getCause() instanceof Error) {
                 PrintlnError(e.getCause().getMessage());
             } else {
-                System.out.println("Can't connect to server");
-                e.printStackTrace(System.out);
+                System.out.println("Unable to communicate with server. Check your network connection and the server. The account was not added.");
             }
         }
     }
 
-    public void addGroup(String accountName){
+    /**
+     * Adds a group to the server with name accountName
+     * @param groupName: name of group to add to the server
+     */
+    public void addGroup(String groupName){
         try {
-            server.addGroup(accountName);
+            server.addGroup(groupName);
+            System.out.println("Group added");
         }
         catch (RemoteException e){
             if (e.getCause() instanceof Error) {
                 PrintlnError(e.getCause().getMessage());
             } else {
-                System.out.println("Can't connect to server");
-                e.printStackTrace(System.out);
+                System.out.println("Unable to communicate with server. Check your network connection and the server. The group was not added.");
             }
         }
     }
 
+    /**
+     * Adds an account username to group groupName
+     * @param groupName: name of group to add the member to
+     * @param username: name of user to add to the group
+     */
     public void addGroupMember(String groupName, String username){
         try {
             server.addGroupMember(groupName, username);
+            System.out.println("Group member added");
         }
         catch (RemoteException e){
             if (e.getCause() instanceof Error) {
                 PrintlnError(e.getCause().getMessage());
             } else {
-                System.out.println("Can't connect to server");
+                System.out.println("Unable to communicate with server. Check your network connection and the server. The group member was not added.");
                 e.printStackTrace(System.out);
             }
         }
     }
 
+    /**
+     * Lists all accounts on the server
+     * @param query: optional wildcard to return only a subset of accounts
+     */
     public void listAccounts(String query) {
         List<String> accounts;
         try {
             accounts = server.listAccounts(query);
         } catch (RemoteException e) {
-            System.out.println("Failed to retrieve account list");
-            e.printStackTrace(System.out);
+            System.out.println("Failed to retrieve account list. Unable to communicate with server. Check your network connection and the server.");
             return;
         }
         if (accounts.isEmpty()) {
@@ -118,13 +145,16 @@ public class Client implements ClientCallback{
         }
     }
 
+    /**
+     * Lists all groups on the server
+     * @param query: optional wildcard to return only a subset of groups
+     */
     public void listGroups(String query) {
         List<String> accounts;
         try {
             accounts = server.listGroups(query);
         } catch (RemoteException e) {
-            System.out.println("Failed to retrieve account list");
-            e.printStackTrace(System.out);
+            System.out.println("Failed to retrieve group list. Unable to communicate with server. Check your network connection and the server.");
             return;
         }
         if (accounts.isEmpty()) {
@@ -135,31 +165,55 @@ public class Client implements ClientCallback{
         }
     }
 
+    /**
+     * Sends a message to an account or group
+     * @param target: account or group name of intended message recipient
+     * @param message: message to send
+     */
     public void sendMessage(String target, String message){
         try {
             server.sendMessage(target, message);
         }
         catch (RemoteException e){
-            System.out.println("Message Send Failed: Client");
+            System.out.println("Unable to communicate with server. Check your network connection and the server. Message not sent.");
         }
     }
 
-    public int deleteAccount(String accountName){
+    /**
+     * Deletes an account
+     * @param accountName: name of account to delete
+     */
+    public void deleteAccount(String accountName){
         try {
-            return server.deleteAccount(accountName);
+            int ret = server.deleteAccount(accountName);
+            if (ret == 0) {
+                System.out.println("Account Deleted");
+            }
+            else if (ret == -1) {
+                System.out.println("No such account");
+            }
         }
         catch (RemoteException e){
-            System.out.println("Can't connect to server");
-            e.printStackTrace(System.out);
-            return 1;
+            System.out.println("Unable to communicate with server. Check your network connection and the server. Account not deleted.");
         }
     }
 
+    /**
+     * Receives a message from the server and prints it to the console
+     * @param message: message to receive
+     */
     @Override
     public void receiveMessage(String message){
         System.out.println(message);
     }
 
+    /**
+     * Gets reference to server for RMI calls and exports client stub to use for callbacks
+     * @param fromHost: Hostname of registry host to connect to
+     * @Poststate: security manager initialized
+     * @Poststate: client stub is exported and reference is assigned to class variable myStub
+     * @return: Object from the chatserver interface that can be used to call methods from that interface using RMI
+     */
     private ChatServer getServer(String fromHost){
         if (System.getSecurityManager() ==  null){
             System.setSecurityManager(new SecurityManager());
@@ -168,21 +222,23 @@ public class Client implements ClientCallback{
             myStub = (ClientCallback) UnicastRemoteObject.exportObject(this, 0);
             Registry useRegistry = LocateRegistry.getRegistry(fromHost);
             return((ChatServer) useRegistry.lookup("ChatServer"));
-
         }
         catch (Exception e){
-            System.out.println("Unable to find Server");
             return null;
         }
     }
 
+    /**
+     * Core execution loop that takes commands from the user and executes the appropriate methods above
+     * @param args: Takes the server hostname as the first argument
+     */
     public static void main(String [] args)
     {
         if (args.length == 0) {
             System.out.println("Please provide the Server hostname as the first argument");
             return;
         }
-        System.out.println("Please log in. Enter an existing or new username");
+        System.out.println("Please log in. Enter an existing or new username:");
         String input = System.console().readLine();
         Client a = new Client();
         a.login(args[0], input);
@@ -190,7 +246,11 @@ public class Client implements ClientCallback{
         while(true){
             String[] command = System.console().readLine().split(" ", 3);
             if(command[0].equals("AddAccount")){
-                a.addAccount(command[1]);
+                if (command.length != 2)
+                    PrintlnError("Syntax: DeleteAccount name");
+                else {
+                    a.addAccount(command[1]);
+                }
             }
             else if(command[0].equals("ListAccounts"))
             {
@@ -218,17 +278,14 @@ public class Client implements ClientCallback{
                 a.sendMessage(command[1], command[2]);
             }
             else if(command[0].equals("DeleteAccount")){
-                int ret = a.deleteAccount(command[1]);
-                if(ret == 0) {
-                    System.out.println("Account Deleted");
-                }
-                else if(ret == -1){
-                    System.out.println("No such account");
-                }
+                if (command.length != 2)
+                    PrintlnError("Syntax: DeleteAccount name");
+                else
+                    a.deleteAccount(command[1]);
             }
             else if(command[0].equals("Logout")){
                 a.logout();
-                break;
+                System.exit(0);
             }
             else{
                 System.out.println("Not a valid command");
