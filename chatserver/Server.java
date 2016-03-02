@@ -43,6 +43,7 @@ public class Server implements ChatServer{
         @Override
         public void receiveMessage(String message) throws RemoteException
         {
+            List<String> deadMembers = new ArrayList<String>();
             for (String member : members) {
                 server.sendMessage(member, message);
             }
@@ -61,7 +62,41 @@ public class Server implements ChatServer{
                 throw new Error("Cannot add one group to another");
             members.add(member);
         }
+
+        /**
+         * Removes a member from a group if was a member before (i.e.
+         * passing an account that's not a member is not an error)
+         * @param member: member to remove from the group
+         */
+        public void removeIfMember(String member) throws Error
+        {
+            members.remove(member);
+        }
     }
+
+    /**
+     * A ClientCallback that implements message queuing while the client is away.
+     */
+    public class Mailbox implements ClientCallback {
+        private List<String> messages;
+
+        public Mailbox() {
+            messages = new ArrayList<String>();
+        }
+
+        @Override
+        public void receiveMessage(String message) throws RemoteException
+        {
+            messages.add(message);
+        }
+
+        public void deliverMessages(ClientCallback to) throws RemoteException
+        {
+            for (String message : messages)
+                to.receiveMessage(message);
+        }
+    }
+
 
     /**
      * Adds a group member to a group
@@ -96,7 +131,16 @@ public class Server implements ChatServer{
      */
     @Override
     public void login(String id, ClientCallback client){
-        accounts.put(id, client);
+        ClientCallback old = accounts.put(id, client);
+        if (old instanceof Mailbox) {
+            try {
+                ((Mailbox)old).deliverMessages(client);
+            } catch (RemoteException e) {
+                // If delivery of queued messages failed, put back the mail box
+                // until the client wants to login again.
+                accounts.put(id, old);
+            }
+        }
     }
 
     /**
@@ -104,7 +148,7 @@ public class Server implements ChatServer{
      * @param id: name of account to log out
      */
     public void logout(String id){
-        accounts.put(id, null);
+        accounts.put(id, new Mailbox());
     }
 
     /**
@@ -127,7 +171,7 @@ public class Server implements ChatServer{
      */
     @Override
     public void addAccount(String accountName) throws RemoteException {
-        _addAccount(accountName, null);
+        _addAccount(accountName, new Mailbox());
     }
 
     /**
@@ -187,6 +231,10 @@ public class Server implements ChatServer{
      */
     public int deleteAccount(String accountName){
         if(accounts.containsKey(accountName)){
+            // First remove the account from all groups
+            for (ClientCallback receiver : accounts.values())
+                if (receiver instanceof Group)
+                    ((Group)receiver).removeIfMember(accountName);
             accounts.remove(accountName);
             return 0;
         }
@@ -201,13 +249,21 @@ public class Server implements ChatServer{
      * @param message: message to send
      */
     @Override
-    public void sendMessage(String accountName, String message){
+    public void sendMessage(String accountName, String message) {
         ClientCallback targetClient = accounts.get(accountName);
+        Boolean IsClient = !(targetClient instanceof Group) &&
+            !(targetClient instanceof Mailbox);
         try {
             targetClient.receiveMessage(message);
         }
         catch (RemoteException e){
             System.out.println("Server unable to reach a logged in client.");
+            // If this was an actual client, log out that client and deliver
+            // the message to the mailbox.
+            if (IsClient) {
+                logout(accountName);
+                sendMessage(accountName, message);
+            }
         }
     }
 
@@ -237,6 +293,7 @@ public class Server implements ChatServer{
         catch (Exception e)
         {
             System.out.println("Server was not bound properly.");
+            e.printStackTrace(System.out);
         }
     }
 }
