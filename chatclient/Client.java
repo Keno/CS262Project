@@ -4,13 +4,14 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Arrays;
 import java.util.List;
 
 import chatserver.ChatServer;
 
 /**
- * CS262 assignment 1
+ * CS262 Assignment 1
+ * References: Remote Method Invocation and Object Serialization reading from class
+ *             Oracle Tutoral: An Overview of RMI Applications https://docs.oracle.com/javase/tutorial/rmi/overview.html
  */
 public class Client implements ClientCallback{
 
@@ -20,7 +21,6 @@ public class Client implements ClientCallback{
 
     static private Boolean isWindows()
     {
-        // FIXME: Does Java have const initialization?
         return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
     }
 
@@ -182,7 +182,12 @@ public class Client implements ClientCallback{
      */
     public void sendMessage(String target, String message){
         try {
-            server.sendMessage(target, message);
+            if(server.checkForAccount(target)) {
+                server.sendMessage(target, message);
+            }
+            else{
+                System.out.println("Cannot send message. No such recipient.");
+            }
         }
         catch (RemoteException e){
             System.out.println("Unable to communicate with server. Check your network connection and the server. Message not sent.");

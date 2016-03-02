@@ -5,6 +5,8 @@ import java.rmi.RemoteException;
 
 /**
  * CS262 Assignment 1
+ * References: Remote Method Invocation and Object Serialization reading from class
+ *             Oracle Tutoral: An Overview of RMI Applications https://docs.oracle.com/javase/tutorial/rmi/overview.html
  */
 public interface ClientCallback extends Remote{
 

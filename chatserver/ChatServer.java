@@ -7,7 +7,9 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 /**
- * CS262 assignment 1
+ * CS262 Assignment 1
+ * References: Remote Method Invocation and Object Serialization reading from class
+ *             Oracle Tutoral: An Overview of RMI Applications https://docs.oracle.com/javase/tutorial/rmi/overview.html
  */
 public interface ChatServer extends Remote{
 
