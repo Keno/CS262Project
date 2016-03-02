@@ -8,3 +8,5 @@ run-server-local: $(CLASSES)
 	java -cp . -Djava.rmi.server.hostname=localhost -Djava.rmi.server.codebase=file:///Users/kfischer/Projects/CS262/ -Djava.security.policy=keno.policy chatserver.Server
 run-server-remote: $(CLASSES)
 	java -cp . -Djava.rmi.server.hostname=$(EXT_IP) -Djava.rmi.server.codebase=file:///Users/kfischer/Projects/CS262/ -Djava.security.policy=keno.policy chatserver.Server
+run-client-local: $(CLASSES)
+    java -cp . -Djava.rmi.server.hostname=localhost -Djava.rmi.server.codebase=file:///Users/kfischer/Projects/CS262/ -Djava.security.policy=keno.policy chatclient.Client localhost
