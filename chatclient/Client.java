@@ -18,16 +18,26 @@ public class Client implements ClientCallback{
     private ChatServer server;
     private ClientCallback myStub;
 
+    static private Boolean isWindows()
+    {
+        // FIXME: Does Java have const initialization?
+        return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
+    }
+
     static private void PrintlnResponse(String output) {
-        System.out.print((char)27 + "[1m" + (char)27 + "[34m");
+        if (!isWindows())
+            System.out.print((char)27 + "[1m" + (char)27 + "[34m");
         System.out.println(output);
-        System.out.print((char)27 + "[0m");
+        if (!isWindows())
+            System.out.print((char)27 + "[0m");
     }
 
     static private void PrintlnError(String output) {
-        System.out.print((char)27 + "[1m" + (char)27 + "[31m");
+        if (!isWindows())
+            System.out.print((char)27 + "[1m" + (char)27 + "[31m");
         System.out.println(output);
-        System.out.print((char)27 + "[0m");
+        if (!isWindows())
+            System.out.print((char)27 + "[0m");
     }
 
     /**
