@@ -29,9 +29,15 @@ import java.util.HashSet;
 public class Server implements ChatServer{
 
     /**
-     * Hashmap that pairs account names to the corresponding ClientCallback object needed to send messages to that client
+     * Hashmap that pairs account names to the corresponding ClientCallback object
+     * needed to send messages to that account (user, group, etc).
+     *
+     * The use of the HashMap allows constant lookup time
+     * of random items regardless of the number of accounts the server has,
+     * making it a good way to store this information for this use.
      */
     private HashMap<String, ClientCallback> accounts = new HashMap<String, ClientCallback>();
+
     /**
      * RMI registry the server is registered to
      */
@@ -46,7 +52,17 @@ public class Server implements ChatServer{
      * to all clients in the group.
      */
     public class Group implements ClientCallback {
+        /**
+         * The Server on which on which this group lives. This is used in receiveMessage to
+         * broadcast received messages to the members of the group.
+         */
         private Server server;
+        
+        /**
+         * The account names of all accounts that any messages received by this
+         * group should be re-broadcast to. At all times, the accounts referenced
+         * here MUST refer to user accounts not group accounts.
+         */
         private Set<String> members;
 
         public Group(Server TheServer) {
@@ -55,9 +71,13 @@ public class Server implements ChatServer{
         }
 
         /**
-         * Receives a message from the server and resends it to all members of the group
+         * Receives a message from the server and broadcasts it to all members of the group.
+         *
+         * It is important to note that this method calls back to the server object to perform
+         * the actual delivery of the messages, in order to properly handle all cases, e.g.
+         * a dropped client connection.
+         *
          * @param	 message	 message to receive
-         * @throws RemoteException on RMI failure. Check connection to server.
          */
         @Override
         public void receiveMessage(String message) throws RemoteException
@@ -84,7 +104,14 @@ public class Server implements ChatServer{
 
         /**
          * Removes a member from a group if was a member before (i.e.
-         * passing an account that's not a member is not an error)
+         * passing an account that's not a member is not an error).
+         *
+         * Note that this message MUST be called whenever an account that could
+         * have been a member of this group is removed in order to enforce that
+         * a group may not contain other groups as members (if this method is
+         * not called, a user account could be deleted and recreated as a group,
+         * leading to dispatch loops).
+         *
          * @param	 member	 member to remove from the group
          */
         public void removeIfMember(String member) throws Error
@@ -95,20 +122,39 @@ public class Server implements ChatServer{
 
     /**
      * A ClientCallback that implements message queuing while the client is away.
+     * The server substitutes in an instance of this class as a placeholder
+     * whenever a client disconnects from the server (either voluntarily or
+     * forcibly due to an error condition). Once the client reconnects, the
+     * server invokes the deliverMessages method, instructing the Mailbox to
+     * deliver its messages. If this succeeds, the Mailbox will be removed, and
+     * the client will once again be reachable by its account name. If message
+     * delivery fails, the mailbox remains associated with the account name and
+     * keeps accumulating messages.
      */
     public class Mailbox implements ClientCallback {
+        /**
+         * The messages queued in this mailbox
+         */
         private List<String> messages;
 
         public Mailbox() {
             messages = new ArrayList<String>();
         }
 
+        /**
+         * Queue a message for later delivery
+         */
         @Override
         public void receiveMessage(String message) throws RemoteException
         {
             messages.add(message);
         }
 
+        /**
+         * Deliver all queued messages to the specified client
+         *
+         * @param to the client to deliver the messages to
+         */
         public void deliverMessages(ClientCallback to) throws RemoteException
         {
             for (String message : messages)
@@ -141,15 +187,20 @@ public class Server implements ChatServer{
         return (accounts.containsKey(accountName));
     }
 
-    //on login, key/value pair of client name/reference to client is added to accounts.
-    //This is later used for lookup to send messages to that client
     /**
-     * Logs an account with the given name into the server and associates it with a ClientCallback
+     * Logs an account with the given name into the server and associates it
+     * with a ClientCallback.
+     *
+     * Furthermore, we will attempt to deliver any queued messages if there was
+     * a mailbox associated with this account name.
+     *
      * @param	 id	 name of account to log in
      * @param	 client	 reference to object with ClientCallback interface
      */
     @Override
     public void login(String id, ClientCallback client){
+       //on login, key/value pair of client name/reference to client is added to accounts.
+       //This is later used for lookup to send messages to that client
         ClientCallback old = accounts.put(id, client);
         if (old instanceof Mailbox) {
             try {
@@ -164,6 +215,10 @@ public class Server implements ChatServer{
 
     /**
      * Logs out an account with the given name
+     *
+     * The account name will now refer to a mailbox instead, queueing up messages
+     * until the next time the user reconnects to this server.
+     *
      * @param	 id	 name of account to log out
      */
     public void logout(String id){

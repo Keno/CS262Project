@@ -1,5 +1,5 @@
 /**
- * # The chatclient package
+ * # The chatserver package
  *
  * This package implements the core business logic of the application.
  *
