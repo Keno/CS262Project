@@ -9,7 +9,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
- * Class level comments go here
+ * This interface allows an implementing class to receive messages using RMI
  */
 public interface ClientCallback extends Remote{
 

@@ -15,7 +15,8 @@ import java.util.List;
 import chatserver.ChatServer;
 
 /**
- * Class level comments go here
+ * A class to instantiate a client for the chat server. Any number of clients can exist simultanously. Its interactions
+ * with the chat server are described at the package level.
  */
 public class Client implements ClientCallback{
 
@@ -239,6 +240,7 @@ public class Client implements ClientCallback{
 
     /**
      * Receives a message from the server and prints it to the console
+     * This method is intended to be called over RMI by the chat server being used to send the message
      * @param message: message to receive
      */
     @Override
@@ -286,7 +288,7 @@ public class Client implements ClientCallback{
             String[] command = System.console().readLine().split(" ", 3);
             if(command[0].equals("AddAccount")){
                 if (command.length != 2)
-                    PrintlnError("Syntax: DeleteAccount name");
+                    PrintlnError("Syntax: AddAccount name");
                 else {
                     a.addAccount(command[1]);
                 }

@@ -22,7 +22,8 @@ import java.util.Set;
 import java.util.HashSet;
 
 /**
- * Class level comments go here
+ * A class to instantiate a chat server for any number of clients. It's interactions with the clientsr are described at
+ * the package level.
  * All override methods, all of which throw remoteexceptions, are intended to be called over RMI from the client code
  */
 public class Server implements ChatServer{

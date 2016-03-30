@@ -12,7 +12,8 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 /**
- * Class level comments go here
+ * This interface, with all methods to be called by the clients over RMI, includes the methods needed in the server for
+ * the clients to be able to manipulate the list of accounts and to send messages
  */
 public interface ChatServer extends Remote{
 

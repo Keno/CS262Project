@@ -1,2 +1,1 @@
-# Common trouble:
-- ClassNotFoundException in remote when launching server. Make sure rmiregistry is either started from project directory or supplied with classpath.
+Documentation generated using javadoc and is included in html format in the documentation folder.
