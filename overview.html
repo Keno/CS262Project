@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Overview of Chat Application</title>
+</head>
+<body>
+This code implements a server-client chat application.<br />
+<br />
+The application includes two packages, {@link chatclient} for the client and {@link chatserver} for the server, which
+communicate using Java RMI. Because RMI allows methods of one class to be called by another as if they were local
+methods, most of the 'heavy lifting' is done in the server code, with the client simply calling server methods to
+accomplish its tasks. Note, however, that because the server must return values to the client when messages are sent to
+it and thus must be able to communicate with the client at will, the server must also be able to call methods in the
+client. This slightly loosens the client/server dichotomy, as instances of both classes take both roles for different
+functions. Details regarding the functionality of the classes individually are included at the package level.<br />
+<big><b>Tutorial</b><br /></big>
+<b>Compiling the Application:</b> <br />
+To compile the code, we first make a JAR of the interface classes. On windows: <br />
+cd \CS262Project <br />
+javac chatclient\ClientCallback.java chatserver\ChatServer.java <br />
+jar cvf chat.jar chatserver\ChatServer.class chatclient\ClientCallback.class <br />
+<br />
+To build the server class, on windows: <br />
+javac -cp chat.jar chatserver\Server.java <br />
+<br />
+To build the client class, on windows: <br />
+javac -cp chat.jar chatclient\Client.java <br />
+<br />
+<b>Running the Application:</b> <br />
+To start the server, first start the rmi registry on the server machine. On windows, assuming port 1999 is usable: <br />
+start rmiregistry <br />
+If you wish to use a different port, it is specified as the argument to the above command. Now we need to configure
+the security policy file. Using the file {@link keno.policy}, change the path to the source directory. Then, to start
+the server on Windows<br />
+
+java -cp chat.jar -Djava.rmi.server.codebase=file:chat.jar -Djava.rmi.server.hostname=hostname -Djava.security.policy=keno.policy server.Server <br />
+
+Then, on the client machine, we can connect to this server by running <br />
+
+java -cp chat.jar -Djava.security.policy=Keno.policy client.ChatClient hostname <br />
+
+The client should then be connected to the server and can begin chatting.<br />
+<br />
+<b>Using the Chat Server:</b><br />
+On connecting, the user supplies an account name for the client. If it does not exist, it is created. If it does exist
+and there is an outstanding message queue, the messages are sent to the client. The client can then begin to enter
+commands. The valid commands, which are the first term in each of the instructions below, and the corresponding syntax
+are <br />
+<br />
+AddAccount name<br />
+ListAccounts<br />
+ListGroups<br />
+AddGroup name<br />
+AddGroupMember name user<br />
+Send message<br />
+DeleteAccount name<br />
+Logout<br />
+<br />
+The last command entered should be Logout, and then the session ends.<br />
+<br />
+</body>
+</html>
