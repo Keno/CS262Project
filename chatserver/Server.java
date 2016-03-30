@@ -1,3 +1,11 @@
+/**
+ * CS262 Assignment 1
+ * References: Remote Method Invocation and Object Serialization reading from class
+ *             Oracle Tutoral: An Overview of RMI Applications https://docs.oracle.com/javase/tutorial/rmi/overview.html
+ *
+ *
+ */
+
 package chatserver;
 
 import chatclient.ClientCallback;
@@ -14,18 +22,27 @@ import java.util.Set;
 import java.util.HashSet;
 
 /**
- * CS262 Assignment 1
- * References: Remote Method Invocation and Object Serialization reading from class
- *             Oracle Tutoral: An Overview of RMI Applications https://docs.oracle.com/javase/tutorial/rmi/overview.html
+ * Class level comments go here
+ * All override methods, all of which throw remoteexceptions, are intended to be called over RMI from the client code
  */
 public class Server implements ChatServer{
 
+    /**
+     * Hashmap that pairs account names to the corresponding ClientCallback object needed to send messages to that client
+     */
     private HashMap<String, ClientCallback> accounts = new HashMap<String, ClientCallback>();
+    /**
+     * RMI registry the server is registered to
+     */
     private Registry registry;
+    /**
+     * Stub that can be exported to allow client to make RMI calls to the server
+     */
     private ChatServer myStub;
 
     /**
-     * Class containing a set of accounts. Overrides the receiveMessage function in the client to send messages to all clients in the group
+     * Class containing a set of accounts. Overrides the receiveMessage function in the client to send messages
+     * to all clients in the group.
      */
     public class Group implements ClientCallback {
         private Server server;
@@ -39,7 +56,7 @@ public class Server implements ChatServer{
         /**
          * Receives a message from the server and resends it to all members of the group
          * @param message: message to receive
-         * @throws RemoteException
+         * @throws RemoteException on RMI failure. Check connection to server.
          */
         @Override
         public void receiveMessage(String message) throws RemoteException
@@ -53,7 +70,7 @@ public class Server implements ChatServer{
         /**
          * Adds a member to the group
          * @param member: member to add to the group
-         * @throws Error
+         * @throws Error with appropriate message if adding the member fails
          */
         public void addMember(String member) throws Error
         {
@@ -103,7 +120,7 @@ public class Server implements ChatServer{
      * Adds a group member to a group
      * @param groupName: name of group to add the member to
      * @param accountName: name of account to add to group
-     * @throws RemoteException
+     * @throws RemoteException on RMI failure. Check connection to server.
      */
     @Override
     public void addGroupMember(String groupName, String accountName) throws RemoteException
@@ -116,7 +133,7 @@ public class Server implements ChatServer{
     /**
      * Checks if an account exists on the server
      * @param accountName: account to check for
-     * @return
+     * @return True if account exists, false if it does not
      */
     @Override
     public Boolean checkForAccount(String accountName){
@@ -154,9 +171,9 @@ public class Server implements ChatServer{
 
     /**
      * Method to add account or group to the HashMap storing account and group names
-     * @param accountName
-     * @param x
-     * @throws RemoteException
+     * @param accountName: name of account to add
+     * @param x: ClientCallback object corresponding to account name, which provides a reference so server can send messages
+     * @throws RemoteException on RMI failure. Check connection to server.
      */
     private void _addAccount(String accountName, ClientCallback x) throws RemoteException {
         if (accounts.containsKey(accountName)) {
@@ -168,7 +185,7 @@ public class Server implements ChatServer{
     /**
      * Adds an account to the server
      * @param accountName: name of account to add
-     * @throws RemoteException
+     * @throws RemoteException on RMI failure. Check connection to server.
      */
     @Override
     public void addAccount(String accountName) throws RemoteException {
@@ -178,7 +195,7 @@ public class Server implements ChatServer{
     /**
      * Adds a group to the server
      * @param groupName: name of group to add
-     * @throws RemoteException
+     * @throws RemoteException on RMI failure. Check connection to server.
      */
     @Override
     public void addGroup(String groupName) throws RemoteException {
@@ -188,9 +205,9 @@ public class Server implements ChatServer{
     /**
      * Method to list accounts or groups, with an optional parameter query which lists a subset of accounts or groups by wildcard
      * @param query: query with wildcard to return a subset of all groups
-     * @param groups
-     * @return
-     * @throws RemoteException
+     * @param groups:
+     * @return list of accounts or groups
+     * @throws RemoteException on RMI failure. Check connection to server.
      */
     private List<String> _listAccounts(String query, Boolean groups) throws RemoteException {
         // MVP
@@ -206,8 +223,8 @@ public class Server implements ChatServer{
     /**
      * Lists accounts on the server, with an optional parameter query which lists a subset of accounts by wildcard
      * @param query: query with wildcard to return a subset of all groups
-     * @return
-     * @throws RemoteException
+     * @return list of accounts on server
+     * @throws RemoteException on RMI failure. Check connection to server.
      */
     @Override
     public List<String> listAccounts(String query) throws RemoteException {
@@ -217,8 +234,8 @@ public class Server implements ChatServer{
     /**
      * Lists groups on the server, with an optional parameter query which lists a subset of accounts by wildcard
      * @param query: query with wildcard to return a subset of all groups
-     * @return
-     * @throws RemoteException
+     * @return list of groups
+     * @throws RemoteException on RMI failure. Check connection to server.
      */
     @Override
     public List<String> listGroups(String query) throws RemoteException {
@@ -270,7 +287,7 @@ public class Server implements ChatServer{
 
     /**
      * Adds server to RMI registry and exports stub so that clients can access the server
-     * @throws RemoteException
+     * @throws RemoteException on RMI failure. Check connection to server.4
      */
     public void exportServer() throws RemoteException {
         if (System.getSecurityManager() ==  null){

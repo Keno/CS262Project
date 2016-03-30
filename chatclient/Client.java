@@ -1,3 +1,9 @@
+/**
+ * CS262 Assignment 1
+ * References: Remote Method Invocation and Object Serialization reading from class
+ *             Oracle Tutoral: An Overview of RMI Applications https://docs.oracle.com/javase/tutorial/rmi/overview.html
+ */
+
 package chatclient;
 
 import java.rmi.RemoteException;
@@ -9,21 +15,36 @@ import java.util.List;
 import chatserver.ChatServer;
 
 /**
- * CS262 Assignment 1
- * References: Remote Method Invocation and Object Serialization reading from class
- *             Oracle Tutoral: An Overview of RMI Applications https://docs.oracle.com/javase/tutorial/rmi/overview.html
+ * Class level comments go here
  */
 public class Client implements ClientCallback{
 
+    /**
+     * name of client
+     */
     private String name;
+    /**
+     * Chatserver object the client is connected to in order to make RMI calls
+     */
     private ChatServer server;
+    /**
+     * Stub that can be exported to allow server to make RMI calls to client to pass messages back
+     */
     private ClientCallback myStub;
 
+    /**
+     * Checks if machine is windows or not
+     * @return True if executed on a windows machine, false otherwise
+     */
     static private Boolean isWindows()
     {
         return System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
     }
 
+    /**
+     * Prints colored output for messages on non-windows machines (cmd can't handle coloration)
+     * @param output string to output
+     */
     static private void PrintlnResponse(String output) {
         if (!isWindows())
             System.out.print((char)27 + "[1m" + (char)27 + "[34m");
@@ -32,6 +53,10 @@ public class Client implements ClientCallback{
             System.out.print((char)27 + "[0m");
     }
 
+    /**
+     * Prints colored output for errors on non-windows machines (cmd can't handle coloration)
+     * @param output string to output
+     */
     static private void PrintlnError(String output) {
         if (!isWindows())
             System.out.print((char)27 + "[1m" + (char)27 + "[31m");
@@ -44,7 +69,6 @@ public class Client implements ClientCallback{
      * Logs accountName into server, creating account accountName if it does not already exist
      * @param fromHost: Hostname of registry host to connect to
      * @param accountName: Name of account to login to
-     * @Poststate: Server creates account accountName if it does not already exist
      */
     public void login(String fromHost, String accountName){
         try {
@@ -224,9 +248,9 @@ public class Client implements ClientCallback{
 
     /**
      * Gets reference to server for RMI calls and exports client stub to use for callbacks
+     * Postconditition: security manager initialized
+     * Postcondition: client stub is exported and reference is assigned to class variable myStub
      * @param fromHost: Hostname of registry host to connect to
-     * @Poststate: security manager initialized
-     * @Poststate: client stub is exported and reference is assigned to class variable myStub
      * @return: Object from the chatserver interface that can be used to call methods from that interface using RMI
      */
     private ChatServer getServer(String fromHost){
