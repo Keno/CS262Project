@@ -1,18 +1,32 @@
 /**
- * This package provides an interface and class for the server for a chat application.
+ * # The chatclient package
  *
- * The {@link chatserver.Server} class implements a server, which contains a list of active chat accounts, each of which
- * can represent an individual or a group. The Server
- * implements the {@link chatserver.ChatServer} interface, which contains RMI-callable methods that allow a client to
- * manipulate this list, such as by adding accounts through {@link chatserver.Server#addAccount(java.lang.String)}, as
- * well as sending a message to another account using {@link chatserver.Server#sendMessage(java.lang.String, java.lang.String)}.
- * The list is saved as a Hashmap {@link chatserver.Server#accounts} that pairs account names with ClientCallback objects.
- * When a client logs in to the server using {@link chatserver.Server#login(java.lang.String, chatclient.ClientCallback)},
- * it passes the server a stub pointing to itself so the server can call rmi methods from that client. When the server
- * wants to send a message, it only receives an account name from the sending client. By matching the account name to the
- * ClientCallback object, the server can send the desired message using an rmi call to {@link chatclient.Client#receiveMessage(java.lang.String)}
- * in the client code, acting here as a client to deliver the message.The use of the HashMap allows constant lookup time
- * of random items regardless of the number of accounts the server has, making it a good way to store this information
- * for this use.
+ * This package implements the core business logic of the application.
+ *
+ * On the one hand, it contains the {@link chatserver.ChatServer}, which defines
+ * the entrypoints available to clients. The functions available in this interface
+ * essentially stand in 1-to-1 correspondance with the commands the users may
+ * enter at the command prompt, e.g. {@link chatserver.Server#addAccount(java.lang.String)}
+ * for adding a new account to the server. These commands are usually invoked by
+ * the client immediately after command parsing and syntax validation.
+ *
+ * The {@link chatserver.Server} implements this protocol and contains the core
+ * business logic. The {@link chatserver.Server} class maintains a list 
+ * ({@link chatserver.Server#accounts}) of  active chat accounts, each of which
+ * can represent an individual or a group.
+ * Importantly, when routing messages, the server is agnostic to whether a
+ * particular account is a user or a group. Both the client stub and the
+ * {@link chatserver.Server.Group} implement the {@link chatclient.ClientCallback}
+ * interface. If the account is a user, the message is sent via RMI to the client
+ * in order to display it to the user. If the account is a group, the same code
+ * will instead locally inoke the group's {@link chatserver.Server.Group#receiveMessage}
+ * which will then pass the message on to its members in the appropriate fashion.
+ *
+ * The same mechanism is also used for offline users. When a user disconnects
+ * from the server, or if message delivery fails for some other reason, their
+ * entry in the account list is replaced by an instance of
+ * {@link chatserver.Server.Mailbox}, whose receiveMessage method will simply
+ * queue any messages sent to it until the user once again reconnects to the
+ * server.
  */
 package chatserver;
