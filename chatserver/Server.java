@@ -56,7 +56,7 @@ public class Server implements ChatServer{
 
         /**
          * Receives a message from the server and resends it to all members of the group
-         * @param message: message to receive
+         * @param	 message	 message to receive
          * @throws RemoteException on RMI failure. Check connection to server.
          */
         @Override
@@ -70,7 +70,7 @@ public class Server implements ChatServer{
 
         /**
          * Adds a member to the group
-         * @param member: member to add to the group
+         * @param	 member	 member to add to the group
          * @throws Error with appropriate message if adding the member fails
          */
         public void addMember(String member) throws Error
@@ -85,7 +85,7 @@ public class Server implements ChatServer{
         /**
          * Removes a member from a group if was a member before (i.e.
          * passing an account that's not a member is not an error)
-         * @param member: member to remove from the group
+         * @param	 member	 member to remove from the group
          */
         public void removeIfMember(String member) throws Error
         {
@@ -119,8 +119,8 @@ public class Server implements ChatServer{
 
     /**
      * Adds a group member to a group
-     * @param groupName: name of group to add the member to
-     * @param accountName: name of account to add to group
+     * @param	 groupName	 name of group to add the member to
+     * @param	 accountName	 name of account to add to group
      * @throws RemoteException on RMI failure. Check connection to server.
      */
     @Override
@@ -133,7 +133,7 @@ public class Server implements ChatServer{
 
     /**
      * Checks if an account exists on the server
-     * @param accountName: account to check for
+     * @param	 accountName	 account to check for
      * @return True if account exists, false if it does not
      */
     @Override
@@ -145,8 +145,8 @@ public class Server implements ChatServer{
     //This is later used for lookup to send messages to that client
     /**
      * Logs an account with the given name into the server and associates it with a ClientCallback
-     * @param id: name of account to log in
-     * @param client: reference to object with ClientCallback interface
+     * @param	 id	 name of account to log in
+     * @param	 client	 reference to object with ClientCallback interface
      */
     @Override
     public void login(String id, ClientCallback client){
@@ -164,7 +164,7 @@ public class Server implements ChatServer{
 
     /**
      * Logs out an account with the given name
-     * @param id: name of account to log out
+     * @param	 id	 name of account to log out
      */
     public void logout(String id){
         accounts.put(id, new Mailbox());
@@ -172,8 +172,8 @@ public class Server implements ChatServer{
 
     /**
      * Method to add account or group to the HashMap storing account and group names
-     * @param accountName: name of account to add
-     * @param x: ClientCallback object corresponding to account name, which provides a reference so server can send messages
+     * @param	 accountName	 name of account to add
+     * @param	 x	 ClientCallback object corresponding to account name, which provides a reference so server can send messages
      * @throws RemoteException on RMI failure. Check connection to server.
      */
     private void _addAccount(String accountName, ClientCallback x) throws RemoteException {
@@ -185,7 +185,7 @@ public class Server implements ChatServer{
 
     /**
      * Adds an account to the server
-     * @param accountName: name of account to add
+     * @param	 accountName	 name of account to add
      * @throws RemoteException on RMI failure. Check connection to server.
      */
     @Override
@@ -195,7 +195,7 @@ public class Server implements ChatServer{
 
     /**
      * Adds a group to the server
-     * @param groupName: name of group to add
+     * @param	 groupName	 name of group to add
      * @throws RemoteException on RMI failure. Check connection to server.
      */
     @Override
@@ -205,8 +205,8 @@ public class Server implements ChatServer{
 
     /**
      * Method to list accounts or groups, with an optional parameter query which lists a subset of accounts or groups by wildcard
-     * @param query: query with wildcard to return a subset of all groups
-     * @param groups:
+     * @param	 query	 query with wildcard to return a subset of all groups
+     * @param	 groups	
      * @return list of accounts or groups
      * @throws RemoteException on RMI failure. Check connection to server.
      */
@@ -223,7 +223,7 @@ public class Server implements ChatServer{
 
     /**
      * Lists accounts on the server, with an optional parameter query which lists a subset of accounts by wildcard
-     * @param query: query with wildcard to return a subset of all groups
+     * @param	 query	 query with wildcard to return a subset of all groups
      * @return list of accounts on server
      * @throws RemoteException on RMI failure. Check connection to server.
      */
@@ -234,7 +234,7 @@ public class Server implements ChatServer{
 
     /**
      * Lists groups on the server, with an optional parameter query which lists a subset of accounts by wildcard
-     * @param query: query with wildcard to return a subset of all groups
+     * @param	 query	 query with wildcard to return a subset of all groups
      * @return list of groups
      * @throws RemoteException on RMI failure. Check connection to server.
      */
@@ -245,8 +245,8 @@ public class Server implements ChatServer{
 
     /**
      * Deletes an account
-     * @param accountName: name of account to delete
-     * @return: 0 if successful and -1 if account does not exist
+     * @param	 accountName	 name of account to delete
+     * @return 0 if successful and -1 if account does not exist
      */
     public int deleteAccount(String accountName){
         if(accounts.containsKey(accountName)){
@@ -264,8 +264,8 @@ public class Server implements ChatServer{
 
     /**
      * Sends a message to a given client or group of clients
-     * @param accountName: name of account or group to send the message to
-     * @param message: message to send
+     * @param	 accountName	 name of account or group to send the message to
+     * @param	 message	 message to send
      */
     @Override
     public void sendMessage(String accountName, String message) {

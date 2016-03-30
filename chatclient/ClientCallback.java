@@ -15,7 +15,7 @@ public interface ClientCallback extends Remote{
 
     /**
      * Receives message from server and prints it to the console
-     * @param message: message to receive
+     * @param	 message	 message to receive
      * @throws RemoteException on RMI failure. Check connection to server.
      */
     void receiveMessage(String message) throws RemoteException;

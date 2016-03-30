@@ -68,8 +68,8 @@ public class Client implements ClientCallback{
 
     /**
      * Logs accountName into server, creating account accountName if it does not already exist
-     * @param fromHost: Hostname of registry host to connect to
-     * @param accountName: Name of account to login to
+     * @param	 fromHost	 Hostname of registry host to connect to
+     * @param	 accountName	 Name of account to login to
      */
     public void login(String fromHost, String accountName){
         try {
@@ -106,7 +106,7 @@ public class Client implements ClientCallback{
 
     /**
      * Adds accountName as an account on the server
-     * @param accountName: account to add to the server
+     * @param	 accountName	 account to add to the server
      */
     public void addAccount(String accountName){
         try {
@@ -124,7 +124,7 @@ public class Client implements ClientCallback{
 
     /**
      * Adds a group to the server with name accountName
-     * @param groupName: name of group to add to the server
+     * @param	 groupName	 name of group to add to the server
      */
     public void addGroup(String groupName){
         try {
@@ -142,8 +142,8 @@ public class Client implements ClientCallback{
 
     /**
      * Adds an account username to group groupName
-     * @param groupName: name of group to add the member to
-     * @param username: name of user to add to the group
+     * @param	 groupName	 name of group to add the member to
+     * @param	 username	 name of user to add to the group
      */
     public void addGroupMember(String groupName, String username){
         try {
@@ -162,7 +162,7 @@ public class Client implements ClientCallback{
 
     /**
      * Lists all accounts on the server
-     * @param query: optional wildcard to return only a subset of accounts
+     * @param	 query	 optional wildcard to return only a subset of accounts
      */
     public void listAccounts(String query) {
         List<String> accounts;
@@ -182,7 +182,7 @@ public class Client implements ClientCallback{
 
     /**
      * Lists all groups on the server
-     * @param query: optional wildcard to return only a subset of groups
+     * @param	 query	 optional wildcard to return only a subset of groups
      */
     public void listGroups(String query) {
         List<String> accounts;
@@ -202,8 +202,8 @@ public class Client implements ClientCallback{
 
     /**
      * Sends a message to an account or group
-     * @param target: account or group name of intended message recipient
-     * @param message: message to send
+     * @param	 target	 account or group name of intended message recipient
+     * @param	 message	 message to send
      */
     public void sendMessage(String target, String message){
         try {
@@ -221,7 +221,7 @@ public class Client implements ClientCallback{
 
     /**
      * Deletes an account
-     * @param accountName: name of account to delete
+     * @param	 accountName	 name of account to delete
      */
     public void deleteAccount(String accountName){
         try {
@@ -241,7 +241,7 @@ public class Client implements ClientCallback{
     /**
      * Receives a message from the server and prints it to the console
      * This method is intended to be called over RMI by the chat server being used to send the message
-     * @param message: message to receive
+     * @param	 message	 message to receive
      */
     @Override
     public void receiveMessage(String message){
@@ -252,8 +252,8 @@ public class Client implements ClientCallback{
      * Gets reference to server for RMI calls and exports client stub to use for callbacks
      * Postconditition: security manager initialized
      * Postcondition: client stub is exported and reference is assigned to class variable myStub
-     * @param fromHost: Hostname of registry host to connect to
-     * @return: Object from the chatserver interface that can be used to call methods from that interface using RMI
+     * @param	 fromHost	 Hostname of registry host to connect to
+     * @return Object from the chatserver interface that can be used to call methods from that interface using RMI
      */
     private ChatServer getServer(String fromHost){
         if (System.getSecurityManager() ==  null){
@@ -271,7 +271,7 @@ public class Client implements ClientCallback{
 
     /**
      * Core execution loop that takes commands from the user and executes the appropriate methods above
-     * @param args: Takes the server hostname as the first argument
+     * @param	 args	 Takes the server hostname as the first argument
      */
     public static void main(String [] args)
     {
